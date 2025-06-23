@@ -6,6 +6,7 @@ import { databaseConfig } from "./config/database.config";
 // 설정 파일들
 import { envValidationSchema } from "./config/env.validation";
 import { jwtConfig, jwtModuleConfig } from "./config/jwt.config";
+import { AuthModule } from './auth/auth.module';
 // import { EventEmitterModule } from '@nestjs/event-emitter'; // 나중에 설치 예정
 
 /**
@@ -81,7 +82,7 @@ import { jwtConfig, jwtModuleConfig } from "./config/jwt.config";
 		// }),
 
 		// 도메인 모듈들은 Step 2에서 추가 예정
-		// AuthModule,
+		AuthModule,
 	],
 	controllers: [],
 	providers: [],

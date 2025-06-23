@@ -1,5 +1,7 @@
 import { registerAs } from "@nestjs/config";
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { RefreshTokenTypeOrmEntity } from '../auth/infrastructure/database/entities/refresh-token.typeorm.entity';
+import { UserTypeOrmEntity } from '../auth/infrastructure/database/entities/user.typeorm.entity';
 
 /**
  * 데이터베이스 설정 팩토리
@@ -22,10 +24,12 @@ export const databaseConfig = registerAs(
 
 		// 엔티티 경로 설정
 		// TypeORM이 자동으로 엔티티를 찾을 수 있도록 패턴을 지정
-		entities: [`${__dirname}/../**/*.typeorm.entity{.ts,.js}`],
+		// entities: [`${__dirname}/../**/*.typeorm.entity{.ts,.js}`],
+		// entities: [RefreshTokenTypeOrmEntity, UserTypeOrmEntity],
+		autoLoadEntities: true,
 
 		// 마이그레이션 설정
-		migrations: [`${__dirname}/../**/migrations/*{.ts,.js}`],
+		// migrations: [`${__dirname}/../**/migrations/*{.ts,.js}`],
 
 		// 개발 환경에서만 스키마 자동 동기화 활성화
 		// 프로덕션에서는 반드시 false로 설정해야 합니다!
