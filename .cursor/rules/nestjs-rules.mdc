@@ -5,3 +5,162 @@ alwaysApply: true
 ---
 use context7
 use pnpm package manager
+
+general implementation order: Domain → Application → Infrastructure → Presentation
+
+- actual hybrid implementation approach
+Phase 1 - 기반 설정:
+1. 환경 변수 설정 (DB, JWT, Config)
+2. 데이터베이스 연결
+3. 기본 모듈 구조
+4. TypeORM 엔티티 (스키마 정의)
+
+Phase 2 - 도메인 핵심:
+5. 도메인 엔티티 & 값 객체 정의
+6. 리포지토리 인터페이스
+7. 도메인 예외
+
+Phase 3 - 애플리케이션 로직:
+8. 애플리케이션 서비스
+9. DTO 정의
+
+Phase 4 - 인프라 구현:
+10. 리포지토리 구현체
+11. 외부 서비스 (JWT, 소셜 로그인)
+
+Phase 5 - API 계층:
+12. 컨트롤러
+13. 가드 & 데코레이터
+14. 예외 필터
+
+- 도메인 설계
+-- 도메인 엔티티와 값 객체 정의
+--  비즈니스 규칙 구현
+
+- 기능별 수직적 구현
+-- 회원가입 API → 애플리케이션 서비스 → 리포지토리 → 테스트
+
+
+- auth-VC folder structure
+apps/auth-vC/src/
+├── app/
+│   ├── app.module.ts
+│   └── app.controller.ts
+├── auth/                              # Auth 도메인 루트
+│   ├── application/                   # 애플리케이션 계층
+│   │   ├── services/                  # 애플리케이션 서비스
+│   │   │   ├── auth.service.ts
+│   │   │   ├── user.service.ts
+│   │   │   ├── jwt.service.ts
+│   │   │   ├── password.service.ts
+│   │   │   └── social-auth.service.ts
+│   │   ├── dto/                       # 애플리케이션 DTO
+│   │   │   ├── auth.dto.ts
+│   │   │   ├── user.dto.ts
+│   │   │   └── social-auth.dto.ts
+│   │   └── events/                    # 도메인 이벤트
+│   │       ├── handlers/              # 이벤트 핸들러
+│   │       │   ├── user-registered.handler.ts
+│   │       │   ├── user-logged-in.handler.ts
+│   │       │   └── user-deleted.handler.ts
+│   │       └── events/                # 이벤트 클래스
+│   │           ├── user-registered.event.ts
+│   │           ├── user-logged-in.event.ts
+│   │           └── user-deleted.event.ts
+│   ├── domain/                        # 도메인 계층
+│   │   ├── entities/                  # 도메인 엔티티
+│   │   │   ├── user.entity.ts
+│   │   │   └── refresh-token.entity.ts
+│   │   ├── value-objects/             # 값 객체
+│   │   │   ├── email.vo.ts
+│   │   │   ├── password.vo.ts
+│   │   │   ├── provider.vo.ts
+│   │   │   └── user-id.vo.ts
+│   │   ├── repositories/              # 리포지토리 인터페이스
+│   │   │   ├── user.repository.interface.ts
+│   │   │   └── refresh-token.repository.interface.ts
+│   │   ├── services/                  # 도메인 서비스
+│   │   │   ├── user.domain.service.ts
+│   │   │   └── password.domain.service.ts
+│   │   └── exceptions/                # 도메인 예외
+│   │       ├── user-already-exists.exception.ts
+│   │       ├── invalid-credentials.exception.ts
+│   │       ├── user-not-found.exception.ts
+│   │       └── invalid-refresh-token.exception.ts
+│   ├── infrastructure/                # 인프라스트럭처 계층
+│   │   ├── database/
+│   │   │   ├── entities/              # TypeORM 엔티티
+│   │   │   │   ├── user.typeorm.entity.ts
+│   │   │   │   └── refresh-token.typeorm.entity.ts
+│   │   │   ├── repositories/          # 리포지토리 구현체
+│   │   │   │   ├── user.typeorm.repository.ts
+│   │   │   │   └── refresh-token.typeorm.repository.ts
+│   │   │   ├── migrations/            # 데이터베이스 마이그레이션
+│   │   │   │   ├── 1234567890-create-users-table.ts
+│   │   │   │   └── 1234567891-create-refresh-tokens-table.ts
+│   │   │   └── seeds/                 # 시드 데이터
+│   │   │       └── user.seed.ts
+│   │   ├── external-services/         # 외부 서비스
+│   │   │   ├── google-auth.service.ts
+│   │   │   ├── apple-auth.service.ts
+│   │   │   └── email.service.ts
+│   │   ├── guards/                    # 가드
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   ├── refresh-token.guard.ts
+│   │   │   └── optional-auth.guard.ts
+│   │   ├── strategies/                # Passport 전략
+│   │   │   ├── jwt.strategy.ts
+│   │   │   ├── refresh-token.strategy.ts
+│   │   │   ├── google.strategy.ts
+│   │   │   └── apple.strategy.ts
+│   │   └── config/                    # 설정
+│   │       ├── database.config.ts
+│   │       ├── jwt.config.ts
+│   │       └── social-auth.config.ts
+│   └── presentation/                  # 프레젠테이션 계층
+│       ├── controllers/
+│       │   ├── auth.controller.ts
+│       │   ├── user.controller.ts
+│       │   └── social-auth.controller.ts
+│       ├── dto/                       # 요청/응답 DTO
+│       │   ├── requests/
+│       │   │   ├── signup.request.dto.ts
+│       │   │   ├── login.request.dto.ts
+│       │   │   ├── refresh-token.request.dto.ts
+│       │   │   └── social-login.request.dto.ts
+│       │   └── responses/
+│       │       ├── auth.response.dto.ts
+│       │       ├── user.response.dto.ts
+│       │       └── token.response.dto.ts
+│       ├── decorators/                # 커스텀 데코레이터
+│       │   ├── current-user.decorator.ts
+│       │   ├── public.decorator.ts
+│       │   └── roles.decorator.ts
+│       ├── filters/                   # 예외 필터
+│       │   ├── auth-exception.filter.ts
+│       │   └── domain-exception.filter.ts
+│       └── interceptors/              # 인터셉터
+│           ├── response.interceptor.ts
+│           └── logging.interceptor.ts
+├── shared/                            # 공통 모듈
+│   ├── interfaces/
+│   │   ├── repository.interface.ts
+│   │   └── service.interface.ts
+│   ├── types/
+│   │   ├── auth.types.ts
+│   │   └── common.types.ts
+│   ├── constants/
+│   │   ├── auth.constants.ts
+│   │   └── app.constants.ts
+│   ├── utils/
+│   │   ├── hash.util.ts
+│   │   ├── token.util.ts
+│   │   └── validation.util.ts
+│   └── enums/
+│       ├── provider.enum.ts
+│       └── user-status.enum.ts
+├── config/                            # 전역 설정
+│   ├── app.config.ts
+│   ├── database.config.ts
+│   └── env.validation.ts
+└── main.ts
