@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { UserTypeOrmEntity } from './database/entities/user.typeorm.entity';
-import { RefreshTokenTypeOrmEntity } from './database/entities/refresh-token.typeorm.entity';
+import { RefreshTokenTypeOrmEntity } from "./database/entities/refresh-token.typeorm.entity";
+import { UserTypeOrmEntity } from "./database/entities/user.typeorm.entity";
 
 /**
  * Auth Infrastructure Module
@@ -13,15 +13,13 @@ import { RefreshTokenTypeOrmEntity } from './database/entities/refresh-token.typ
  * - 데이터베이스 관련 인프라 관리
  */
 @Module({
-	imports: [TypeOrmModule.forFeature([
-		UserTypeOrmEntity,
-		RefreshTokenTypeOrmEntity
-	])],
+	imports: [
+		TypeOrmModule.forFeature([UserTypeOrmEntity, RefreshTokenTypeOrmEntity]),
+	],
 	providers: [
 		// 향후 추가될 리포지토리 구현체들
 		// UserTypeOrmRepository,
 		// RefreshTokenTypeOrmRepository,
-
 		// 외부 서비스들
 		// GoogleAuthService,
 		// AppleAuthService,

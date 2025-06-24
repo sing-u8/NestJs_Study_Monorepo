@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { AuthInfrastructureModule } from './infrastructure/auth-infrastructure.module';
+import { Module } from "@nestjs/common";
+import { AuthInfrastructureModule } from "./infrastructure/auth-infrastructure.module";
 
 /**
  * Auth Module - Auth 도메인의 루트 모듈

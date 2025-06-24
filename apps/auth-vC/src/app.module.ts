@@ -2,11 +2,11 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthModule } from "./auth/auth.module";
 import { databaseConfig } from "./config/database.config";
 // 설정 파일들
 import { envValidationSchema } from "./config/env.validation";
 import { jwtConfig, jwtModuleConfig } from "./config/jwt.config";
-import { AuthModule } from './auth/auth.module';
 // import { EventEmitterModule } from '@nestjs/event-emitter'; // 나중에 설치 예정
 
 /**

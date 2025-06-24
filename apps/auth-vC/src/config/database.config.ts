@@ -1,7 +1,7 @@
 import { registerAs } from "@nestjs/config";
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { RefreshTokenTypeOrmEntity } from '../auth/infrastructure/database/entities/refresh-token.typeorm.entity';
-import { UserTypeOrmEntity } from '../auth/infrastructure/database/entities/user.typeorm.entity';
+import { RefreshTokenTypeOrmEntity } from "../auth/infrastructure/database/entities/refresh-token.typeorm.entity";
+import { UserTypeOrmEntity } from "../auth/infrastructure/database/entities/user.typeorm.entity";
 
 /**
  * 데이터베이스 설정 팩토리
