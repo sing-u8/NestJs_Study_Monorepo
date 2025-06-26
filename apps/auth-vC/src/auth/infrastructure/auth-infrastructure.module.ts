@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { RefreshTokenTypeOrmEntity } from "./database/entities/refresh-token.typeorm.entity";
-import { UserTypeOrmEntity } from "./database/entities/user.typeorm.entity";
+import { RefreshTokenTypeOrmEntity } from "./database/entity/refresh-token.typeorm.entity";
+import { UserTypeOrmEntity } from "./database/entity/user.typeorm.entity";
 
 /**
  * Auth Infrastructure Module

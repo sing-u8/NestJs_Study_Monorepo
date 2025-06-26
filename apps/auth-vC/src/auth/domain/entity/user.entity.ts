@@ -1,11 +1,11 @@
-import { UserStatus } from '../../../shared/enum/user-status.enum';
-import { DomainEntity } from '../../../shared/type/common.type';
-import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
-import { AuthProvider, Email, Password, UserId } from '../vo';
+import { UserStatus } from "../../../shared/enum/user-status.enum";
+import { DomainEntity } from "../../../shared/type/common.type";
+import { InvalidCredentialsException } from "../exception/invalid-credentials.exception";
+import { AuthProvider, Email, UserId } from "../vo";
 
 export interface CreateUserProps {
 	email: Email;
-	password?: Password;
+	passwordHash?: string; // 해시된 비밀번호만 저장
 	provider?: AuthProvider;
 	providerId?: string;
 	isEmailVerified?: boolean;
@@ -30,10 +30,12 @@ export class User implements DomainEntity<User> {
 		return new User({
 			id: UserId.generate(),
 			email: props.email,
-			password: props.password,
+			passwordHash: props.passwordHash,
 			provider: props.provider || AuthProvider.createLocal(),
 			providerId: props.providerId,
-			status: props.isEmailVerified ? UserStatus.ACTIVE : UserStatus.PENDING_VERIFICATION,
+			status: props.isEmailVerified
+				? UserStatus.ACTIVE
+				: UserStatus.PENDING_VERIFICATION,
 			isEmailVerified: props.isEmailVerified || false,
 			createdAt: now,
 			updatedAt: now,
@@ -46,7 +48,7 @@ export class User implements DomainEntity<User> {
 		providerId: string,
 	): User {
 		if (provider.isLocal()) {
-			throw new Error('Cannot create social user with local provider');
+			throw new Error("Cannot create social user with local provider");
 		}
 
 		return User.create({
@@ -62,38 +64,50 @@ export class User implements DomainEntity<User> {
 	}
 
 	private validate(): void {
-		// 로컬 계정은 반드시 비밀번호가 있어야 함
-		if (this.props.provider?.isLocal() && !this.props.password) {
-			throw new Error('Local account must have a password');
+		// 로컬 계정은 반드시 해시된 비밀번호가 있어야 함
+		if (this.props.provider?.isLocal() && !this.props.passwordHash) {
+			throw new Error("Local account must have a password hash");
 		}
 
 		// 소셜 계정은 providerId가 있어야 함
 		if (this.props.provider?.isSocial() && !this.props.providerId) {
-			throw new Error('Social account must have providerId');
+			throw new Error("Social account must have providerId");
 		}
 	}
 
-	verifyPassword(plainPassword: string, hashedPassword: string): boolean {
+	/**
+	 * 비밀번호 검증 (도메인 서비스에서 실제 해시 검증 후 호출)
+	 * 이 메서드는 도메인 규칙 검증만 담당
+	 */
+	canVerifyPassword(): boolean {
 		if (!this.props.provider?.isLocal()) {
-			throw new InvalidCredentialsException('Password verification not available for social accounts');
+			return false;
 		}
 
-		if (!this.props.password) {
-			throw new InvalidCredentialsException('No password set for this account');
-		}
-
-		// 실제 구현에서는 bcrypt 등을 사용하여 해시 검증
-		// 여기서는 도메인 로직만 표현
-		return true; // 임시
+		return !!this.props.passwordHash;
 	}
 
-	changePassword(newPassword: Password): void {
+	/**
+	 * 해시된 비밀번호 설정 (도메인 서비스에서 호출)
+	 */
+	setPasswordHash(hashedPassword: string): void {
 		if (!this.props.provider?.isLocal()) {
-			throw new Error('Cannot change password for social accounts');
+			throw new Error("Cannot set password hash for social accounts");
 		}
 
-		this.props.password = newPassword;
+		this.props.passwordHash = hashedPassword;
 		this.props.updatedAt = new Date();
+	}
+
+	/**
+	 * 해시된 비밀번호 조회
+	 */
+	getPasswordHash(): string | undefined {
+		if (!this.props.provider?.isLocal()) {
+			throw new Error("Password hash not available for social accounts");
+		}
+
+		return this.props.passwordHash;
 	}
 
 	verifyEmail(): void {
@@ -203,5 +217,14 @@ export class User implements DomainEntity<User> {
 			createdAt: this.props.createdAt.toISOString(),
 			updatedAt: this.props.updatedAt.toISOString(),
 		};
+	}
+
+	changePasswordHash(newHashedPassword: string): void {
+		if (!this.props.provider?.isLocal()) {
+			throw new Error("Cannot change password hash for social accounts");
+		}
+
+		this.props.passwordHash = newHashedPassword;
+		this.props.updatedAt = new Date();
 	}
 }

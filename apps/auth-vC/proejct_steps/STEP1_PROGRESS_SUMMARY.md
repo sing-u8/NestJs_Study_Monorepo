@@ -50,7 +50,7 @@
 ### 4. TypeORM 엔티티 (인프라스트럭처 계층)
 
 ```typescript
-// apps/auth-vC/src/auth/infrastructure/database/entities/
+// apps/auth-vC/src/auth/infrastructure/database/entity/
 
 // user.typeorm.entity.ts
 - 사용자 기본 정보 (id, email, password_hash)
@@ -70,7 +70,7 @@
 ### 5. 데이터베이스 마이그레이션
 
 ```typescript
-// apps/auth-vC/src/auth/infrastructure/database/migrations/
+// apps/auth-vC/src/auth/infrastructure/database/migration/
 
 // 1234567890-create-users-table.ts
 - users 테이블 생성

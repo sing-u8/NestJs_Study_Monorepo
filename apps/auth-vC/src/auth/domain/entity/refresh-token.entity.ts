@@ -1,6 +1,6 @@
-import { randomUUID } from 'crypto';
-import { DomainEntity } from '../../../shared/type/common.type';
-import { UserId } from '../vo';
+import { randomUUID } from "node:crypto";
+import { DomainEntity } from "../../../shared/type/common.type";
+import { UserId } from "../vo";
 
 export interface CreateRefreshTokenProps {
 	userId: UserId;
@@ -41,19 +41,19 @@ export class RefreshToken implements DomainEntity<RefreshToken> {
 
 	private validate(): void {
 		if (!this.props.userId) {
-			throw new Error('User ID is required');
+			throw new Error("User ID is required");
 		}
 
 		if (!this.props.token || this.props.token.trim().length === 0) {
-			throw new Error('Token is required');
+			throw new Error("Token is required");
 		}
 
 		if (!this.props.expiresAt) {
-			throw new Error('Expiration date is required');
+			throw new Error("Expiration date is required");
 		}
 
 		if (this.props.expiresAt <= new Date()) {
-			throw new Error('Token expiration date must be in the future');
+			throw new Error("Token expiration date must be in the future");
 		}
 	}
 
@@ -67,7 +67,7 @@ export class RefreshToken implements DomainEntity<RefreshToken> {
 
 	markAsUsed(): void {
 		if (!this.isValid()) {
-			throw new Error('Cannot use invalid or expired token');
+			throw new Error("Cannot use invalid or expired token");
 		}
 
 		this.props.lastUsedAt = new Date();
@@ -79,11 +79,11 @@ export class RefreshToken implements DomainEntity<RefreshToken> {
 
 	refresh(newExpiresAt: Date): void {
 		if (!this.isValid()) {
-			throw new Error('Cannot refresh invalid token');
+			throw new Error("Cannot refresh invalid token");
 		}
 
 		if (newExpiresAt <= new Date()) {
-			throw new Error('New expiration date must be in the future');
+			throw new Error("New expiration date must be in the future");
 		}
 
 		this.props.expiresAt = newExpiresAt;
