@@ -1,34 +1,28 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import {
-	Email,
-	UserId,
-} from "../../domain/vo";
+import { Provider } from "../../../shared/enum/provider.enum";
+import { User } from "../../domain/entity";
 import {
 	UserAlreadyExistsException,
 	UserNotFoundException,
 } from "../../domain/exception";
 import { IUserRepository } from "../../domain/repository";
 import { UserDomainService } from "../../domain/service";
-import { User } from "../../domain/entity";
-import { JwtApplicationService } from "./jwt.service";
+import { Email, UserId } from "../../domain/vo";
 import {
-	SocialLoginRequestDto,
-	SocialLoginCallbackDto,
-	LinkAccountRequestDto,
-	UnlinkAccountRequestDto,
-	AuthResponseDto,
-	UserInfoDto,
-	SocialProfileDto,
-	GoogleUserInfoDto,
 	AppleUserInfoDto,
+	AuthResponseDto,
+	GoogleUserInfoDto,
+	LinkAccountRequestDto,
 	SocialAccountDto,
+	SocialLoginCallbackDto,
+	SocialLoginRequestDto,
+	SocialProfileDto,
+	UnlinkAccountRequestDto,
+	UserInfoDto,
 } from "../dto";
-import {
-	UserRegisteredEvent,
-	UserLoggedInEvent,
-} from "../event/event";
-import { Provider } from "../../../shared/enum/provider.enum";
+import { UserLoggedInEvent, UserRegisteredEvent } from "../event/event";
+import { JwtApplicationService } from "./jwt.service";
 
 /**
  * 소셜 인증 애플리케이션 서비스
@@ -64,8 +58,10 @@ export class SocialAuthApplicationService {
 			}
 
 			// 같은 소셜 계정인지 확인
-			if (user.getProvider()?.getValue() !== dto.provider ||
-				user.getProviderId() !== socialProfile.id) {
+			if (
+				user.getProvider()?.getValue() !== dto.provider ||
+				user.getProviderId() !== socialProfile.id
+			) {
 				// 다른 소셜 계정으로 등록된 이메일
 				throw new UserAlreadyExistsException(
 					`Email is already registered with ${user.getProvider()?.getValue()}.`,
@@ -113,7 +109,11 @@ export class SocialAuthApplicationService {
 
 		// 응답 생성
 		const userInfo = this.createUserInfoDto(savedUser);
-		return new AuthResponseDto(tokens.accessToken, tokens.refreshToken, userInfo);
+		return new AuthResponseDto(
+			tokens.accessToken,
+			tokens.refreshToken,
+			userInfo,
+		);
 	}
 
 	/**
@@ -132,10 +132,11 @@ export class SocialAuthApplicationService {
 		const socialProfile = await this.getSocialProfile(dto.provider, dto.code);
 
 		// 3. 해당 소셜 계정이 다른 사용자에게 연결되어 있는지 확인
-		const existingSocialUser = await this.userRepository.findByProviderAndProviderId(
-			this.mapProviderToAuthProvider(dto.provider),
-			socialProfile.id,
-		);
+		const existingSocialUser =
+			await this.userRepository.findByProviderAndProviderId(
+				this.mapProviderToAuthProvider(dto.provider),
+				socialProfile.id,
+			);
 
 		if (existingSocialUser && existingSocialUser.getId() !== user.getId()) {
 			throw new Error("This social account is already linked to another user");
@@ -152,7 +153,10 @@ export class SocialAuthApplicationService {
 	/**
 	 * 소셜 계정 연결 해제
 	 */
-	async unlinkAccount(userId: string, dto: UnlinkAccountRequestDto): Promise<void> {
+	async unlinkAccount(
+		userId: string,
+		dto: UnlinkAccountRequestDto,
+	): Promise<void> {
 		// 1. 사용자 조회
 		const userIdVO = UserId.create(userId);
 		const user = await this.userRepository.findById(userIdVO);
@@ -162,10 +166,15 @@ export class SocialAuthApplicationService {
 		}
 
 		// 2. 연결 해제할 수 있는지 확인
-		if (user.isSocialAccount() && user.getProvider()?.getValue() === dto.provider) {
+		if (
+			user.isSocialAccount() &&
+			user.getProvider()?.getValue() === dto.provider
+		) {
 			// 유일한 로그인 방법인 소셜 계정을 해제하려는 경우
 			if (!user.getPasswordHash()) {
-				throw new Error("Cannot unlink the only authentication method. Please set a password first.");
+				throw new Error(
+					"Cannot unlink the only authentication method. Please set a password first.",
+				);
 			}
 		}
 
@@ -237,7 +246,8 @@ export class SocialAuthApplicationService {
 			client_id: clientId,
 			redirect_uri: redirectUri,
 			response_type: "code",
-			scope: provider === Provider.GOOGLE ? "openid email profile" : "email name",
+			scope:
+				provider === Provider.GOOGLE ? "openid email profile" : "email name",
 			state: this.generateStateParameter(),
 		});
 
@@ -247,7 +257,10 @@ export class SocialAuthApplicationService {
 	/**
 	 * 소셜 제공자에서 사용자 프로필 정보 가져오기 (private)
 	 */
-	private async getSocialProfile(provider: Provider, code: string): Promise<SocialProfileDto> {
+	private async getSocialProfile(
+		provider: Provider,
+		code: string,
+	): Promise<SocialProfileDto> {
 		switch (provider) {
 			case Provider.GOOGLE:
 				return this.getGoogleProfile(code);
@@ -321,8 +334,10 @@ export class SocialAuthApplicationService {
 	 * OAuth state 매개변수 생성 (private)
 	 */
 	private generateStateParameter(): string {
-		return Math.random().toString(36).substring(2, 15) +
-			Math.random().toString(36).substring(2, 15);
+		return (
+			Math.random().toString(36).substring(2, 15) +
+			Math.random().toString(36).substring(2, 15)
+		);
 	}
 
 	/**

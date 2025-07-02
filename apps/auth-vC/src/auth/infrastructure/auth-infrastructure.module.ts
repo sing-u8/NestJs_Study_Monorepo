@@ -1,7 +1,17 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import socialAuthConfig from "./config/social-auth.config";
 import { RefreshTokenTypeOrmEntity } from "./database/entity/refresh-token.typeorm.entity";
 import { UserTypeOrmEntity } from "./database/entity/user.typeorm.entity";
+import { RefreshTokenTypeormRepository } from "./database/repository/refresh-token.typeorm.repository";
+import { UserTypeormRepository } from "./database/repository/user.typeorm.repository";
+import { AppleAuthService } from "./external-service/apple-auth.service";
+import { EmailService } from "./external-service/email.service";
+import { GoogleAuthService } from "./external-service/google-auth.service";
+import { JwtAuthGuard } from "./guard/jwt-auth.guard";
+import { OptionalAuthGuard } from "./guard/optional-auth.guard";
+import { RefreshTokenGuard } from "./guard/refresh-token.guard";
 
 /**
  * Auth Infrastructure Module
@@ -15,26 +25,35 @@ import { UserTypeOrmEntity } from "./database/entity/user.typeorm.entity";
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([UserTypeOrmEntity, RefreshTokenTypeOrmEntity]),
+		ConfigModule.forFeature(socialAuthConfig),
 	],
 	providers: [
-		// 향후 추가될 리포지토리 구현체들
-		// UserTypeOrmRepository,
-		// RefreshTokenTypeOrmRepository,
+		// 리포지토리 구현체들
+		UserTypeormRepository,
+		RefreshTokenTypeormRepository,
 		// 외부 서비스들
-		// GoogleAuthService,
-		// AppleAuthService,
-		// EmailService,
+		EmailService,
+		GoogleAuthService,
+		AppleAuthService,
+		// 가드들
+		JwtAuthGuard,
+		RefreshTokenGuard,
+		OptionalAuthGuard,
 	],
 	exports: [
-		// TypeORM 리포지토리들을 다른 계층에서 사용할 수 있도록 export
+		// TypeORM 리포지토리들
 		TypeOrmModule,
-
-		// 향후 추가될 서비스들
-		// UserTypeOrmRepository,
-		// RefreshTokenTypeOrmRepository,
-		// GoogleAuthService,
-		// AppleAuthService,
-		// EmailService,
+		// 리포지토리 구현체들
+		UserTypeormRepository,
+		RefreshTokenTypeormRepository,
+		// 외부 서비스들
+		EmailService,
+		GoogleAuthService,
+		AppleAuthService,
+		// 가드들
+		JwtAuthGuard,
+		RefreshTokenGuard,
+		OptionalAuthGuard,
 	],
 })
 export class AuthInfrastructureModule {}

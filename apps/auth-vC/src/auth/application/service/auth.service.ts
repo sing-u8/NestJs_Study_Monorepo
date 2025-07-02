@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import {
-	Email,
-	Password,
-	UserId,
-} from "../../domain/vo";
+import { Provider } from "../../../shared/enum/provider.enum";
+import { RefreshToken, User } from "../../domain/entity";
 import {
 	InvalidCredentialsException,
 	InvalidRefreshTokenException,
@@ -15,22 +12,18 @@ import {
 	IUserRepository,
 } from "../../domain/repository";
 import { PasswordDomainService, UserDomainService } from "../../domain/service";
-import { User, RefreshToken } from "../../domain/entity";
-import { JwtApplicationService } from "./jwt.service";
+import { Email, Password, UserId } from "../../domain/vo";
 import {
-	SignUpRequestDto,
-	LoginRequestDto,
-	RefreshTokenRequestDto,
 	AuthResponseDto,
-	UserInfoDto,
-	TokenResponseDto,
+	LoginRequestDto,
 	LogoutRequestDto,
+	RefreshTokenRequestDto,
+	SignUpRequestDto,
+	TokenResponseDto,
+	UserInfoDto,
 } from "../dto";
-import {
-	UserRegisteredEvent,
-	UserLoggedInEvent,
-} from "../event/event";
-import { Provider } from "../../../shared/enum/provider.enum";
+import { UserLoggedInEvent, UserRegisteredEvent } from "../event/event";
+import { JwtApplicationService } from "./jwt.service";
 
 /**
  * 인증 애플리케이션 서비스
@@ -86,7 +79,11 @@ export class AuthApplicationService {
 
 		// 7. 응답 생성
 		const userInfo = this.createUserInfoDto(savedUser);
-		return new AuthResponseDto(tokens.accessToken, tokens.refreshToken, userInfo);
+		return new AuthResponseDto(
+			tokens.accessToken,
+			tokens.refreshToken,
+			userInfo,
+		);
 	}
 
 	/**
@@ -131,7 +128,11 @@ export class AuthApplicationService {
 
 		// 7. 응답 생성
 		const userInfo = this.createUserInfoDto(savedUser);
-		return new AuthResponseDto(tokens.accessToken, tokens.refreshToken, userInfo);
+		return new AuthResponseDto(
+			tokens.accessToken,
+			tokens.refreshToken,
+			userInfo,
+		);
 	}
 
 	/**
@@ -146,7 +147,9 @@ export class AuthApplicationService {
 			dto.refreshToken,
 		);
 		if (!storedToken || !storedToken.isValid()) {
-			throw new InvalidRefreshTokenException("유효하지 않은 리프레시 토큰입니다.");
+			throw new InvalidRefreshTokenException(
+				"유효하지 않은 리프레시 토큰입니다.",
+			);
 		}
 
 		// 3. 사용자 조회

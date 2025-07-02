@@ -48,3 +48,10 @@ export interface SearchOptions extends PaginationOptions {
 	searchTerm?: string;
 	filters?: Record<string, any>;
 }
+
+export interface GetUsersOptions extends PaginationOptions {
+	isActive?: boolean;
+	provider?: string;
+	isEmailVerified?: boolean;
+	search?: string;
+}

@@ -1,28 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import {
-	Email,
-	Password,
-	UserId,
-} from "../../domain/vo";
+import { Provider } from "../../../shared/enum/provider.enum";
+import { User } from "../../domain/entity";
 import {
 	InvalidCredentialsException,
 	UserNotFoundException,
 } from "../../domain/exception";
 import { IUserRepository } from "../../domain/repository";
 import { PasswordDomainService, UserDomainService } from "../../domain/service";
-import { User } from "../../domain/entity";
+import { Email, Password, UserId } from "../../domain/vo";
 import {
-	CreateUserDto,
-	UpdateUserDto,
 	ChangePasswordDto,
+	CreateUserDto,
 	GetUsersQueryDto,
+	UpdateUserDto,
 	UserDetailDto,
 	UsersResponseDto,
 	VerifyEmailDto,
 } from "../dto";
 import { UserDeletedEvent } from "../event/event";
-import { Provider } from "../../../shared/enum/provider.enum";
 
 /**
  * 사용자 애플리케이션 서비스
@@ -105,7 +101,10 @@ export class UserApplicationService {
 	/**
 	 * 사용자 프로필 업데이트
 	 */
-	async updateUser(userId: string, updateDto: UpdateUserDto): Promise<UserDetailDto> {
+	async updateUser(
+		userId: string,
+		updateDto: UpdateUserDto,
+	): Promise<UserDetailDto> {
 		// 사용자 조회
 		const userIdVO = UserId.create(userId);
 		const user = await this.userRepository.findById(userIdVO);
@@ -114,7 +113,7 @@ export class UserApplicationService {
 			throw new UserNotFoundException(userId);
 		}
 
-				// 이메일 업데이트 (현재 구현에서는 제한)
+		// 이메일 업데이트 (현재 구현에서는 제한)
 		if (updateDto.email) {
 			// TODO: User 엔티티에 changeEmail 메서드 구현 필요
 			// 현재는 이메일 변경을 지원하지 않음
@@ -169,10 +168,11 @@ export class UserApplicationService {
 			throw new Error("Password hash not found");
 		}
 
-		const isCurrentPasswordValid = await this.passwordDomainService.verifyPassword(
-			changePasswordDto.currentPassword,
-			currentPasswordHash,
-		);
+		const isCurrentPasswordValid =
+			await this.passwordDomainService.verifyPassword(
+				changePasswordDto.currentPassword,
+				currentPasswordHash,
+			);
 
 		if (!isCurrentPasswordValid) {
 			throw new InvalidCredentialsException("Current password is incorrect");
@@ -180,7 +180,8 @@ export class UserApplicationService {
 
 		// 새 비밀번호 해싱 및 업데이트
 		const newPassword = Password.create(changePasswordDto.newPassword);
-		const newHashedPassword = await this.passwordDomainService.hashPassword(newPassword);
+		const newHashedPassword =
+			await this.passwordDomainService.hashPassword(newPassword);
 
 		user.changePasswordHash(newHashedPassword);
 

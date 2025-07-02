@@ -1,16 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import {
-	Email,
-	Password,
-	UserId,
-} from "../../domain/vo";
+import { User } from "../../domain/entity";
 import {
 	InvalidCredentialsException,
 	UserNotFoundException,
 } from "../../domain/exception";
 import { IUserRepository } from "../../domain/repository";
 import { PasswordDomainService } from "../../domain/service";
-import { User } from "../../domain/entity";
+import { Email, Password, UserId } from "../../domain/vo";
 
 /**
  * 비밀번호 관련 요청 DTO들
@@ -90,7 +86,8 @@ export class PasswordApplicationService {
 
 		// 4. 새 비밀번호 해싱 및 업데이트
 		const newPassword = Password.create(dto.newPassword);
-		const newHashedPassword = await this.passwordDomainService.hashPassword(newPassword);
+		const newHashedPassword =
+			await this.passwordDomainService.hashPassword(newPassword);
 
 		user.changePasswordHash(newHashedPassword);
 
@@ -107,12 +104,15 @@ export class PasswordApplicationService {
 	/**
 	 * 비밀번호 강도 검증
 	 */
-	async validatePasswordStrength(dto: ValidatePasswordStrengthDto): Promise<PasswordStrengthResult> {
+	async validatePasswordStrength(
+		dto: ValidatePasswordStrengthDto,
+	): Promise<PasswordStrengthResult> {
 		try {
 			const password = Password.create(dto.password);
 
 			// 도메인 서비스에서 비밀번호 강도 평가
-			const strength = await this.passwordDomainService.evaluatePasswordStrength(password);
+			const strength =
+				await this.passwordDomainService.evaluatePasswordStrength(password);
 
 			return new PasswordStrengthResult(
 				strength.score,
@@ -123,7 +123,11 @@ export class PasswordApplicationService {
 			// 비밀번호 검증 실패 시 가장 낮은 점수 반환
 			return new PasswordStrengthResult(
 				1,
-				[error instanceof Error ? error.message : "비밀번호가 유효하지 않습니다."],
+				[
+					error instanceof Error
+						? error.message
+						: "비밀번호가 유효하지 않습니다.",
+				],
 				false,
 			);
 		}
@@ -147,10 +151,12 @@ export class PasswordApplicationService {
 		}
 
 		// 임시 비밀번호 생성
-		const temporaryPassword = await this.passwordDomainService.generateTemporaryPassword();
+		const temporaryPassword =
+			await this.passwordDomainService.generateTemporaryPassword();
 
 		// 해싱 및 설정
-		const hashedPassword = await this.passwordDomainService.hashPassword(temporaryPassword);
+		const hashedPassword =
+			await this.passwordDomainService.hashPassword(temporaryPassword);
 		user.changePasswordHash(hashedPassword);
 
 		// 저장
@@ -272,13 +278,18 @@ export class PasswordApplicationService {
 	 */
 	private async sendPasswordChangedNotification(user: User): Promise<void> {
 		// TODO: 이메일 서비스 연동
-		console.log(`비밀번호 변경 알림 이메일 발송: ${user.getEmail().getValue()}`);
+		console.log(
+			`비밀번호 변경 알림 이메일 발송: ${user.getEmail().getValue()}`,
+		);
 	}
 
 	/**
 	 * 임시 비밀번호 이메일 발송 (private)
 	 */
-	private async sendTemporaryPasswordEmail(user: User, temporaryPassword: string): Promise<void> {
+	private async sendTemporaryPasswordEmail(
+		user: User,
+		temporaryPassword: string,
+	): Promise<void> {
 		// TODO: 이메일 서비스 연동
 		console.log(`임시 비밀번호 이메일 발송: ${user.getEmail().getValue()}`);
 		console.log(`임시 비밀번호: ${temporaryPassword}`);
